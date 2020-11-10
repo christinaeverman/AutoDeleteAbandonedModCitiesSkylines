@@ -38,37 +38,38 @@ namespace AutomaticDeleteAbandoned
       {
          if (timer > 0.5f)
          {
-            try
+            timer = 0f;
+            _buildingManager = Singleton<BuildingManager>.instance;
+            var buildings = _buildingManager.m_buildings.m_buffer;
+
+            for (var i = 0; i < _buildingManager.m_buildings.m_buffer.Length; i++)
             {
-               timer = 0f;
-               _buildingManager = Singleton<BuildingManager>.instance;
-               var buildings = _buildingManager.m_buildings.m_buffer;
+               var building = buildings[i];
 
-               for (var i = 0; i < _buildingManager.m_buildings.m_buffer.Length; i++)
+               try
                {
-                  var building = buildings[i];
-
-                  if (((building.m_flags & Building.Flags.Created) != Building.Flags.None) 
+                  if (((building.m_flags & Building.Flags.Created) != Building.Flags.None)
                       && ((building.m_flags & Building.Flags.Deleted) == Building.Flags.None)
-                      && ((building.m_flags & Building.Flags.Abandoned) != Building.Flags.None) || 
+                      && ((building.m_flags & Building.Flags.Abandoned) != Building.Flags.None) ||
                       ((building.m_flags & Building.Flags.BurnedDown) != Building.Flags.None))
                   {
                      if (building.Info.m_buildingAI.CheckBulldozing((ushort)i, ref building) ==
                          ToolBase.ToolErrors.None)
                      {
-                        DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, building.m_flags.ToString());
+                        //DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, building.m_flags.ToString());
                         _buildingManager.ReleaseBuilding((ushort)i);
-                        DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "Demolished abandoned building #" + (ushort)i);
-                        DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, building.m_flags.ToString());
-                        break;
+                        //DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "Demolished abandoned building #" + (ushort)i);
+                        //DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, building.m_flags.ToString());
+                        //break;
                      }
                   }
                }
+               catch (Exception ex)
+               {
+                  DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, "Error deleting abandoned building #" + (ushort)i);
+               }
             }
-            catch (Exception e)
-            {
-               DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, "Error deleting abandoned buildings.");
-            }
+
          }
 
          timer += simulationTimeDelta;
